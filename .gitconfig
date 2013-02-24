@@ -32,8 +32,9 @@
         unstage = reset HEAD --
         discard = checkout HEAD --
         up = push origin
-        contains = branch -a --contains
+	contains = branch -a --contains
 [push]
+	# push ONLY branches I'm currently on
         default = tracking
 [diff]
         renames = copies
