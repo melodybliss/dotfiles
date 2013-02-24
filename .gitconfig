@@ -1,0 +1,50 @@
+[user]
+	name = Melody Bliss
+	email = melody@melodybliss.org
+[github]
+	user = melodybliss
+	token = d2496ba4eec17f8e427c56862284d4a3
+[color]
+        branch = auto
+        diff = auto
+        status = auto
+        ui = true
+[color "status"]
+        added = green bold
+        changed  = cyan bold
+        untracked = yellow bold
+[color "branch"]
+        current = cyan bold
+        local = yellow
+        remote = green
+[alias]
+        s = status -sb
+        b = branch -avv
+        h = show HEAD
+        hf = show HEAD --name-only
+        d = diff
+        di = diff --staged
+        co = checkout
+        f = fetch --prune --all
+        l = log --oneline --decorate
+        lg = log --oneline --decorate -graph
+        lf = log --oneline --decorate --follow --
+        unstage = reset HEAD --
+        discard = checkout HEAD --
+        up = push origin
+        contains = branch -a --contains
+[push]
+        default = tracking
+[diff]
+        renames = copies
+[rerere]
+        enabled = true
+[blame]
+        date = short
+[status]
+        submodulesummary = true
+        relativePaths = false
+        showUntrackedFiles = all
+[notes]
+        rewriteRef = refs/notes/*
+
