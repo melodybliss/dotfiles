@@ -1,0 +1,137 @@
+#!/usr/bin/env python
+# Author:	Melody Bliss <melody@melodybliss.org>
+#
+# cidrgrep takes on the commandline a list of hosts/cidr and looks
+# on stdin lines which match hosts within that cidr block
+# Example:
+# cidrgrep 17.149.4.0/23
+#
+# It can also handle exclusions by using the -v flag
+# Example:
+# cidrgrep -v 17.149.4.0/23
+#
+# This isn't particular super efficient
+import sys
+import re
+
+def getNetwork(host, netmask):
+    """
+    getnet(host, netmask) where host is an IP and netmask is a
+    netmask in w.x.y.z format
+    """
+    hostn=[int(hostn) for hostn in host.split('.')]
+    netmaskn = [int(netmaskn) for netmaskn in netmask.split('.')]
+    newnet = []
+    for n in range(len(hostn)):
+        newnet.append(hostn[n] & netmaskn[n])
+    #print newnet
+    return '.'.join([str(n) for n in newnet])
+
+def getSubnetFromBits(bits):
+    """
+    getsubnets(bits): returns subnet in w.x.y.z format
+    """
+    bits = '1' * bits
+    netmask = ''
+    octet = 0
+    while len(bits) > 8:
+        octet += 1
+        n = bits[:8]
+        bits = bits[8:]
+        netmask += str(int(n, 2)) + '.'
+    bits += '0' * (8 - len(bits))
+    octet += 1
+    netmask += str(int(bits, 2))
+    while octet < 4:
+        netmask += '.0'
+        octet += 1
+    return netmask
+
+def getBroadcast(network, subnet):
+    """
+    getBroadcast(network, subnet): where network is an ip and
+    subnet is in w.x.y.z format. Returns broadcast
+    """
+    hostn=[int(hostn) for hostn in network.split('.')]
+    netmaskn = [int(netmaskn) for netmaskn in subnet.split('.')]
+    newnet = []
+    for n in range(len(hostn)):
+        newnet.append(hostn[n] | ((~netmaskn[n]) % 256))
+    #print newnet
+    return '.'.join([str(n) for n in newnet])
+
+def getHosts(ip, subnet):
+    """
+    getHosts(ip, subnet): Returns all hosts on ip using subnet that
+    are possible
+    """
+    hosts=[]
+    network=getNetwork(ip, subnet)
+    broadcast=getBroadcast(ip, subnet)
+    splitnet=network.split('.')
+    splitnet=[int(i) for i in splitnet]
+    #print '#network', network
+    #print '#broadcast', broadcast
+    hosts.append(network)
+    hosts.append(broadcast)
+    while '.'.join([str(i) for i in splitnet]) != broadcast:
+        #print 'pre:', splitnet
+        splitnet[3] += 1
+        if splitnet[3] == 256:
+            splitnet[3] = 0
+            splitnet[2] += 1
+        if splitnet[2] == 256:
+            splitnet[2] = 0
+            splitnet[1] += 1
+        if splitnet[1] == 256:
+            splitnet[1] = 0
+            splitnet[0] += 1
+        if splitnet[0] > 255:
+            print splitnet
+            print "huh? What?!"
+            exit(1)
+        if '.'.join([str(i) for i in splitnet]) != broadcast:
+            #print '.'.join([str(i) for i in splitnet])
+            hosts.append('.'.join([str(i) for i in splitnet]))
+        #print 'post:', splitnet
+    return hosts
+
+hostslist=[]
+ignorelist=[]
+state='add'
+for net in sys.argv[1:]:
+    if net == '-v':
+        state = 'remove'
+        continue
+    if net.find('/') != -1:
+        (ip, subnet) = net.split('/')
+        if subnet.find('.') == -1:
+            # This is a subnet in bits format. Turn into w.x.y.z format
+            subnet = getSubnetFromBits(int(subnet))
+        if state == 'add':
+            hostslist = hostslist + getHosts(ip, subnet)
+        else:
+            ignorelist = ignorelist + getHosts(ip, subnet)
+            state = 'add'
+
+if not hostslist and not ignorelist:
+    print "No CIDR Defined!"
+    exit(1)
+
+for line in sys.stdin:
+    line = line.rstrip('\n')
+    good=0
+    if hostslist:
+        for host in hostslist:
+            if re.search(host, line):
+                good=1
+    else:
+        # we have no hostslist. Print line by default
+        good=1
+
+    # Check ignore list
+    for ignore in ignorelist:
+        if re.search(ignore, line):
+            good=0
+    if good:
+        print line
