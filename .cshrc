@@ -26,6 +26,7 @@ set XPATH=
 set DPATH=
 set FPATH=/usr/local/bin:
 set UPATH=
+set SVNPATH=
 set GOPATH=
 set GITPATH=
 
@@ -82,9 +83,13 @@ endif
 if ( -d ${HOME}/bin ) then
   set UPATH=${HOME}/bin:
 endif
+# if ~/svn/melody/bin exists, set SVNPATH to it
+if ( -d ${HOME}/svn/melody/bin ) then
+  set SVNPATH=${HOME}/svn/melody/bin:
+endif
 
 # Create the path
-set tPATH=${GITPATH}${UPATH}${GCSPATH}${OPATH}${LPATH}${XPATH}${DPATH}${FPATH}${GOPATH}
+set tPATH=${GITPATH}${UPATH}${GCSPATH}${SVNPATH}${OPATH}${LPATH}${XPATH}${DPATH}${FPATH}${GOPATH}
 setenv PATH `echo ${tPATH} | sed 's/:$//'`
 
 # Man Path
