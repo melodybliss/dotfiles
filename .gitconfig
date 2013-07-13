@@ -49,3 +49,5 @@
 [notes]
         rewriteRef = refs/notes/*
 
+[credential]
+	helper = osxkeychain
