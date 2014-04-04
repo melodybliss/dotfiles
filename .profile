@@ -16,6 +16,15 @@ export EDITOR
 
 export PATH=$HOME/bin:$PATH
 
-if [ -x ~/.alias.sh ]; then
+if [ -f ~/.alias.sh ]; then
 	. ~/.alias.sh
 fi
+
+##
+# Your previous /Users/melody/.profile file was backed up as /Users/melody/.profile.macports-saved_2014-03-31_at_14:25:33
+##
+
+# MacPorts Installer addition on 2014-03-31_at_14:25:33: adding an appropriate PATH variable for use with MacPorts.
+export PATH=/opt/local/bin:/opt/local/sbin:$PATH
+# Finished adapting your PATH environment variable for use with MacPorts.
+
