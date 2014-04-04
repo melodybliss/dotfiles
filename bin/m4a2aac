@@ -1,0 +1,120 @@
+#!/bin/sh
+# File:		m4a2aac
+# Author:	Melody Bliss <melody@melodybliss.org>
+# Purpose:
+# Convert iTunes AAC files to AAC for Plex
+
+# This is the default paths I have on my Media Server
+ORIG="/Volumes/Media/iTunes/iTunes Media/Music"
+# This is the default path I want processed music to live
+NEW="/Volumes/Media/Music/processed"
+
+DEBUG=
+NORUN=
+
+showhelp()
+{
+  cat << EOF
+$0 [-dh "SOURCE" "DESTINATION"]
+This script converts iTunes .m4a files to .aac so that Plex and other
+media streamers can handle them.
+
+If the DESTINATION path doesn't exist, this script will create it.
+Defaults:
+	SOURCE="${ORIG}"
+	DESTINATION="${NEW}"
+
+Options:
+	-h		Help (this page)
+	-d		DEBUG mode
+	-n		No Convert. Just show what you do.
+EOF
+}
+
+D()
+{
+  if [ -z "${DEBUG}" ]; then
+    return
+  fi
+
+  echo "DEBUG: $*" >&2
+}
+
+E()
+{
+  echo "ERROR: $*" >&2
+}
+
+I()
+{
+  echo "INFO: $*"
+}
+
+while getopts 'dhn' opt; do
+  case ${opt} in
+    d)
+	DEBUG="yes"
+	D "On."
+	;;
+    h)
+	showhelp
+	exit 0
+	;;
+    n)
+	NORUN="yes"
+	;;
+  esac
+done
+shift `expr ${OPTIND} - 1`
+
+if [ ! -z "$1" ]; then
+  ORIG="$1"
+fi
+
+if [ ! -z "$2" ]; then
+  NEW="$2"
+fi
+
+I "Processing Music in ${ORIG}"
+I "Destination: ${NEW}"
+
+D "Changing to directory ${ORIG}"
+cd "${ORIG}"
+
+if [ $? -ne 0 ]; then
+  E "Changing to directory ${ORIG} FAILED. Cannot Continue."
+  exit 1
+fi
+
+if [ ! -d ${NEW} ]; then
+  D "${NEW} doesn't exist."
+  D "Creating directory ${NEW}"
+  mkdir -p ${NEW}
+fi
+
+D "Searching for .m4a files and converting."
+find . -type f -name '*.m4a' | while read -r filename; do
+  DIR=`dirname "${filename}"`
+  NEWFILE=`basename "${filename}" | sed 's/.m4a/.aac/'`
+  I "Processing: ${filename}"
+  I "New Path: ${NEW}/${DIR}/${NEWFILE}" 
+
+  if [ ! -d "${NEW}/${DIR}" ]; then
+    D "Creating subdirectory ${NEW}/${DIR}"
+    mkdir -p "${NEW}/${DIR}"
+  fi
+
+  if [ -f "${NEW}/${DIR}/${NEWFILE}" ]; then
+    I "Skipping ${filename}"
+    I "Target already exists: ${NEW}/${DIR}/${NEWFILE}"
+    continue
+  fi
+
+  if [ -z "${NORUN}" ]; then
+    D "Converting..."
+    afconvert -f 'adts' -o "${NEW}/${DIR}/${NEWFILE}" "${filename}"
+    D "Complete."
+  else
+    I "afconvert -f 'adts' -o \"${NEW}/${DIR}/${NEWFILE}\" \"${filename}\""
+  fi
+done
