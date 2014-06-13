@@ -16,6 +16,19 @@ export EDITOR
 
 export PATH=$HOME/bin:$PATH
 
+# If this is a Mac, see if docker is installed. If so, set DOCKER_HOST if it
+# isn't already set
+
+if [ "`uname -s`" = "Darwin" ]; then
+  # Yes, this is a Mac
+  if [ -x /usr/local/bin/docker -a -d /Applications/boot2docker.app ]; then
+    # Yes, docker is installed
+    if [ -z "${DOCKER_HOST}" ]; then
+      # Yes, DOCKER_HOST isn't set. Let's set it
+      DOCKER_HOST=tcp://:2375; export DOCKER_HOST
+    fi
+  fi
+fi
 if [ -f ~/.alias.sh ]; then
 	. ~/.alias.sh
 fi
