@@ -29,7 +29,7 @@ set UPATH=
 set SVNPATH=
 set GOPATH=
 set GITPATH=
-set GOPATH=${HOME}/go
+setenv GOPATH ${HOME}/go
 
 # Google Go Compiler
 if ( -d /usr/local/go/bin ) then
