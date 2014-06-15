@@ -29,10 +29,11 @@ set UPATH=
 set SVNPATH=
 set GOPATH=
 set GITPATH=
+set GOPATH=${HOME}/go
 
 # Google Go Compiler
-if ( -d ${HOME}/src/go/bin ) then
-  set GOPATH=${HOME}/src/go/bin:
+if ( -d /usr/local/go/bin ) then
+  set GOBINPATH=/usr/local/go/bin:
 endif
 
 if( -d /usr/local/git ) then
@@ -89,7 +90,7 @@ if ( -d ${HOME}/svn/melody/bin ) then
 endif
 
 # Create the path
-set tPATH=${GITPATH}${UPATH}${GCSPATH}${SVNPATH}${OPATH}${LPATH}${XPATH}${DPATH}${FPATH}${GOPATH}
+set tPATH=${GITPATH}${UPATH}${GCSPATH}${SVNPATH}${OPATH}${LPATH}${XPATH}${DPATH}${FPATH}${GOBINPATH}
 setenv PATH `echo ${tPATH} | sed 's/:$//'`
 
 # Man Path
