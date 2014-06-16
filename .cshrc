@@ -138,3 +138,10 @@ setenv PATH /opt/local/bin:/opt/local/sbin:$PATH
 set path=( "/Applications/microchip/mplabc30/v3.30c/bin" $path )
 
 set path=( "/Applications/microchip/mplabc32/v2.02/bin" $path )
+
+# Setup DOCKER_HOST
+if ( "`uname -s`" == "Darwin" ) then
+  if ( -x /usr/local/bin/docker && -d /Applications/boot2docker.app ) then
+    setenv DOCKER_HOST tcp://:2375
+  endif
+endif
